@@ -9,7 +9,7 @@
     <permission android:name="com.termux.permission.TERMUX_SERVICE"
         android:label="@string/termux_permission_label"
         android:description="@string/termux_permission_description"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:protectionLevel="dangerous"/>  
 
     <uses-feature
@@ -47,6 +47,7 @@
     <application
         android:name=".app.TermuxApplication"
         android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/banner"
         android:extractNativeLibs="true"
         android:icon="@mipmap/ic_launcher"
