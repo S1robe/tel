@@ -166,10 +166,20 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
      */
     private boolean mIsActivityRecreated = false;
 
-    /**
-     * The {@link TermuxActivity} is in an invalid state and must not be run.
-     */
-    private boolean mIsInvalidState;
+    private final BroadcastReceiver mBroadcastReceiever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mIsVisible) {
+                String whatToReload = intent.getStringExtra(RELOAD_STYLE_ACTION);
+                if ("storage".equals(whatToReload)) {
+                    if (ensureStoragePermissionGranted())
+                        TermuxInstaller.setupStorageSymlinks(TermuxActivity.this);
+                    return;
+                }else if ("apps-cache".equals(whatToReload)) {
+                    TermuxInstaller.setupAppListCache(TermuxActivity.this);
+                }
+                checkForFontAndColors();
+                mSettings.reloadFromProperties(TermuxActivity.this);
 
     private int mNavBarHeight;
 
