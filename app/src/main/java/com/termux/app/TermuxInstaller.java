@@ -392,6 +392,7 @@ final class TermuxInstaller {
 
                     final PackageManager pm = context.getPackageManager();
                     List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+                    int packageIndex = 420;
                     for (ApplicationInfo packageInfo : packages) {
                         final String  packageName     = packageInfo.packageName;
                         final String  appName         = packageInfo.loadLabel(pm).toString();
@@ -405,8 +406,9 @@ final class TermuxInstaller {
                         }
 
                         final String  LaunchComponent = LaunchActivity.getComponent().flattenToShortString();
-                        printStream.print( appName + "|" + LaunchComponent + "|" + packageName + "|" + isSystemApp + "\n");
-                        printStreamNames.print(appName+ "\n");
+                        printStream.print( appName + "|" + LaunchComponent + "|" + packageName + "|" + isSystemApp + "|"+packageIndex+"\n");
+                        printStreamNames.print(packageIndex+ "|"+appName+ "\n");
+                        packageIndex++;
                     } // for package in packages
 
                     // close file
