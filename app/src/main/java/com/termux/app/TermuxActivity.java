@@ -379,9 +379,123 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         Logger.logVerbose(LOG_TAG, "onSaveInstanceState");
 
-        super.onSaveInstanceState(savedInstanceState);
-        saveTerminalToolbarTextInput(savedInstanceState);
-        savedInstanceState.putBoolean(ARG_ACTIVITY_RECREATED, true);
+        super.onCreate(bundle);
+
+        setContentView(R.layout.drawer_layout);
+
+        if (mIsUsingBlackUI) {
+            findViewById(R.id.left_drawer).setBackgroundColor(
+                getResources().getColor(android.R.color.background_dark)
+            );
+        }
+
+        mTerminalView = findViewById(R.id.terminal_view);
+        mTerminalView.setOnKeyListener(new TermuxViewClient(this));
+
+        mTerminalView.setTextSize(mSettings.getFontSize());
+        mTerminalView.setKeepScreenOn(mSettings.isScreenAlwaysOn());
+        mTerminalView.requestFocus();
+
+        final ViewPager viewPager = findViewById(R.id.viewpager);
+        if (mSettings.mShowExtraKeys) viewPager.setVisibility(View.VISIBLE);
+
+
+        ViewGroup.LayoutParams layoutParams = viewPager.getLayoutParams();
+        layoutParams.height = layoutParams.height * mSettings.mExtraKeys.length;
+        viewPager.setLayoutParams(layoutParams);
+
+        viewPager.setAdapter(new PagerAdapter() {
+            @Override
+            public int getCount() {
+                return 2;
+            }
+
+            @Override
+            public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+                return view == object;
+            }
+
+            @NonNull
+            @Override
+            public Object instantiateItem(@NonNull ViewGroup collection, int position) {
+                LayoutInflater inflater = LayoutInflater.from(TermuxActivity.this);
+                View layout;
+                if (position == 0) {
+                    layout = mExtraKeysView = (ExtraKeysView) inflater.inflate(R.layout.extra_keys_main, collection, false);
+                    mExtraKeysView.reload(mSettings.mExtraKeys, ExtraKeysView.defaultCharDisplay);
+                } else {
+                    layout = inflater.inflate(R.layout.extra_keys_right, collection, false);
+                    final EditText editText = layout.findViewById(R.id.text_input);
+                    editText.setOnEditorActionListener((v, actionId, event) -> {
+                        TerminalSession session = getCurrentTermSession();
+                        if (session != null) {
+                            if (session.isRunning()) {
+                                String textToSend = editText.getText().toString();
+                                if (textToSend.length() == 0) textToSend = "\r";
+                                session.write(textToSend);
+                            } else {
+                                removeFinishedSession(session);
+                            }
+                            editText.setText("");
+                        }
+                        return true;
+                    });
+                }
+                collection.addView(layout);
+                return layout;
+            }
+
+            @Override
+            public void destroyItem(@NonNull ViewGroup collection, int position, @NonNull Object view) {
+                collection.removeView((View) view);
+            }
+        });
+
+        viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                if (position == 0) {
+                    mTerminalView.requestFocus();
+                } else {
+                    final EditText editText = viewPager.findViewById(R.id.text_input);
+                    if (editText != null) editText.requestFocus();
+                }
+            }
+        });
+
+        View newSessionButton = findViewById(R.id.new_session_button);
+        newSessionButton.setOnClickListener(v -> addNewSession(false, null));
+        newSessionButton.setOnLongClickListener(v -> {
+            DialogUtils.textInput(TermuxActivity.this, R.string.session_new_named_title, null, R.string.session_new_named_positive_button,
+                text -> addNewSession(false, text), R.string.new_session_failsafe, text -> addNewSession(true, text)
+                , -1, null, null);
+            return true;
+        });
+
+        findViewById(R.id.toggle_keyboard_button).setOnClickListener(v -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+            getDrawer().closeDrawers();
+        });
+
+        findViewById(R.id.toggle_keyboard_button).setOnLongClickListener(v -> {
+            toggleShowExtraKeys();
+            return true;
+        });
+
+        registerForContextMenu(mTerminalView);
+
+        Intent serviceIntent = new Intent(this, TermuxService.class);
+        // Start the service and make it run regardless of who is bound to it:
+        startService(serviceIntent);
+        if (!bindService(serviceIntent, this, 0))
+            throw new RuntimeException("bindService() failed");
+
+        checkForFontAndColors();
+
+        mBellSoundId = mBellSoundPool.load(this, R.raw.bell, 1);
+        // Update app cache
+        TermuxInstaller.setupAppListCache(TermuxActivity.this);
     }
 
 
