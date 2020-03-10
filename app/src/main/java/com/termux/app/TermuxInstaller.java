@@ -378,6 +378,7 @@ final class TermuxInstaller {
     public static void setupAppListCache(final Context context) {
         final String LOG_TAG = "termux-applist";
         final String APPLIST_CACHE_FILE = ".apps";
+        final String APPNAME_CACHE_FILE = ".app_names";
         new Thread() {
             public void run() {
                 try {
@@ -385,6 +386,9 @@ final class TermuxInstaller {
                     final File targetFile = new File(TermuxService.HOME_PATH, APPLIST_CACHE_FILE);
                     final FileOutputStream outStream = new FileOutputStream(targetFile);
                     final PrintStream printStream = new PrintStream(outStream);
+                    final File targetFileNames = new File(TermuxService.HOME_PATH, APPNAME_CACHE_FILE);
+                    final FileOutputStream outStreamNames = new FileOutputStream(targetFileNames);
+                    final PrintStream printStreamNames = new PrintStream(outStreamNames);
 
                     final PackageManager pm = context.getPackageManager();
                     List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
@@ -402,13 +406,18 @@ final class TermuxInstaller {
 
                         final String  LaunchComponent = LaunchActivity.getComponent().flattenToShortString();
                         printStream.print( appName + "|" + LaunchComponent + "|" + packageName + "|" + isSystemApp + "\n");
+                        printStreamNames.print(appName);
                     } // for package in packages
 
                     // close file
                     printStream.flush();
+                    printStreamNames.flush();
                     printStream.close();
+                    printStreamNames.close();
                     outStream.flush();
+                    outStreamNames.flush();
                     outStream.close();
+                    outStreamNames.close();
 
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Error setting up applist-cache", e);
