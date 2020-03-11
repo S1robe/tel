@@ -47,9 +47,9 @@ if [ "$UPDATE" = false ]; then
 	echo "\n\n\n### TEL STUFF ###\n set -K # disables ! events in zsh to allow for bangs in Duckduckgo searches\nsource ~/.tel/.dev/.tel_aliases\nsource ~/.envvar # User custom ENV vars\nsource ~/.aliases # User custom Aliases\n\n\n# Example Startup Scripts\n#tel-fetch --source ~/.tel/usr/asciiart.txt\ncat ~/../usr/etc/motd\n#cmatrix -s\n#neofetch -L | lolcat -a -p 40 -s 200\n#clear" >> ~/.zshrc
 
 	log "installing configs"
-	cp -r ~/../usr/tel/.byobu/* ~/.byobu/
-	cp -r ~/../usr/tel/.termux/* ~/.termux/
-	cp -r ~/../usr/tel/.tel/* ~/.tel/
+	cp -r ~/../usr/tel/.byobu/{.,}* ~/.byobu/
+	cp -r ~/../usr/tel/.termux/{.,}* ~/.termux/
+	cp -r ~/../usr/tel/.tel/{.,}* ~/.tel/
 fi
 
 cd ~
