@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.jakewharton.processphoenix.ProcessPhoenix;
 import com.termux.R;
 import com.termux.app.api.file.FileReceiverActivity;
 import com.termux.app.terminal.TermuxActivityRootView;
@@ -178,7 +179,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 }else if ("apps-cache".equals(whatToReload)) {
                     TermuxInstaller.setupAppListCache(TermuxActivity.this);
                 }else if ("restart".equals(whatToReload)){
-                    TermuxInstaller.doRestart(TermuxActivity.this);
+                    ProcessPhoenix.triggerRebirth(TermuxActivity.this);
                 }
                 checkForFontAndColors();
                 mSettings.reloadFromProperties(TermuxActivity.this);

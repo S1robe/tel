@@ -34,7 +34,7 @@ android {
         implementation "io.noties.markwon:recycler:$markwonVersion"
 
         implementation project(":terminal-view")
-        implementation project(":termux-shared")
+        implementation 'com.jakewharton:process-phoenix:2.0.0'
     }
 
     defaultConfig {
