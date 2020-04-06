@@ -107,3 +107,4 @@ else
 fi
 
 sleep 5
+tel-restart
